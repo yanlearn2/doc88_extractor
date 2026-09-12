@@ -1,24 +1,35 @@
+# Downloaded documents and SWF files
+/docs/
+
+# ffdec Java tool (download separately)
+/ffdec/
+
+# ffdec config files
+config.toml
+config.bin
+
+# Downloaded binary tools
+presse.exe
+
+# Logs
+/logs/
+*.log
+
+# Python
+__pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
 *.swp
 *.swo
-*.ebt
-*.txt
-*.swf
-build/
-dist/
-__pycache__/
-docs/
-ffdec*
-test/
-fonts/
-.vscode/launch.json
-logs/
-*.json
-debug*
-docin.py
-*.svg
-*.pdf
-svg2pdf*
-presse*
-*.xdf
-*.hexproj
+*~
+
+# OS
+.DS_Store
+Thumbs.db
