@@ -4,6 +4,10 @@
 
 A tool to extract and convert doc88 documents (non-screenshot).
 
+> **本项目基于 [cmy2008/doc88_extractor](https://github.com/cmy2008/doc88_extractor) 修改，保留原作者完整提交历史。感谢原作者的开源贡献。**
+>
+> This project is modified from [cmy2008/doc88_extractor](https://github.com/cmy2008/doc88_extractor), preserving the original author's full commit history. Thanks to the original author for the open-source contribution.
+
 ## 特点 / Features
 
 
@@ -138,3 +142,19 @@ python3 main.py
 * 若启用 `svgfontface` 选项，由于 [typst/svg2pdf](https://github.com/typst/svg2pdf) 的缺陷，将无法转换字体，会自动替换为默认字体
 
 * 若启用 `svgfontface` 选项，由于 [ffdec](https://github.com/jindrapetrik/jpexs-decompiler) 的缺陷，某些形状或文本会出现转换错误
+
+## 致谢 / Acknowledgements
+
+- **原项目 / Original Project**: [cmy2008/doc88_extractor](https://github.com/cmy2008/doc88_extractor) — 核心逻辑与实现
+- **ffdec**: [jindrapetrik/jpexs-decompiler](https://github.com/jindrapetrik/jpexs-decompiler) — SWF 反编译与转换
+- **svg2pdf**: [typst/svg2pdf](https://github.com/typst/svg2pdf) — SVG 转 PDF
+
+## 版权声明 / Copyright Notice
+
+本项目基于 [cmy2008/doc88_extractor](https://github.com/cmy2008/doc88_extractor) 修改，原项目未附带开源许可证（LICENSE）。根据著作权法，原作者保留所有权利。
+
+This project is modified from [cmy2008/doc88_extractor](https://github.com/cmy2008/doc88_extractor). The original project does not include an open-source license (LICENSE). Under copyright law, the original author retains all rights.
+
+- 本仓库仅用于个人学习与研究，不用于商业用途。 / This repository is for personal learning and research only, not for commercial use.
+- 保留原作者完整提交历史与署名。 / The original author's full commit history and attribution are preserved.
+- 如原作者认为本仓库侵犯其权益，请联系删除。 / If the original author believes this repository infringes their rights, please contact us for removal.
