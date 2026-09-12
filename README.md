@@ -143,6 +143,44 @@ python3 main.py
 
 * 若启用 `svgfontface` 选项，由于 [ffdec](https://github.com/jindrapetrik/jpexs-decompiler) 的缺陷，某些形状或文本会出现转换错误
 
+
+## Rust 引擎 / Rust Engine
+
+本项目支持使用纯 Rust 实现的 [swf2pdf-rs](https://github.com/yanlearn2/swf2pdf-rs) 作为 SWF→PDF 转换引擎，**完全不需要 Java 环境**。
+
+This project supports using the pure Rust [swf2pdf-rs](https://github.com/yanlearn2/swf2pdf-rs) as the SWF→PDF conversion engine, **requiring no Java environment at all**.
+
+### 启用方法 / How to Enable
+
+1. 从 [swf2pdf-rs Releases](https://github.com/yanlearn2/swf2pdf-rs/releases) 下载对应平台的二进制文件（Windows: `swf2pdf.exe`）
+
+2. 将二进制文件放到程序目录下，或在 `config.json` 中设置 `swf2pdf_bin` 为其绝对路径
+
+3. 在 `config.json` 中将 `use_rust` 设为 `true`：
+
+```json
+{
+    "use_rust": true,
+    "swf2pdf_bin": "swf2pdf.exe"
+}
+```
+
+### 对比 / Comparison
+
+| 维度 | ffdec (Java) | swf2pdf-rs (Rust) |
+|------|-------------|-------------------|
+| 运行时依赖 | 需要 JRE 8+ | 无，单二进制 |
+| 启动速度 | 慢（JVM 启动） | 快（原生） |
+| 分发体积 | JRE ~200MB | 二进制 ~3MB |
+| 矢量完整度 | 高（含渐变/蒙版） | 中（纯色为主，渐变待实现） |
+| 适用场景 | 通用，复杂文档 | 标准文档（黑白文字+表格） |
+
+### 注意事项 / Notes
+
+- Rust 模式下会自动跳过 Java/ffdec/presse 的检查和下载
+- 适用于道客巴巴标准文档（黑白文字+表格+简单矢量图），可覆盖 80%+ 场景
+- 如遇复杂文档（含渐变、位图填充、透明度等），可切换回 ffdec 模式（`use_rust: false`）
+
 ## 致谢 / Acknowledgements
 
 - **原项目 / Original Project**: [cmy2008/doc88_extractor](https://github.com/cmy2008/doc88_extractor) — 核心逻辑与实现

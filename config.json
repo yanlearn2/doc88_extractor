@@ -17,5 +17,7 @@
     "path_replace": true,
     "download_workers": 10,
     "convert_workers": 5,
-    "pdf_scale": 1.0
+    "pdf_scale": 1.0,
+    "use_rust": false,
+    "swf2pdf_bin": "swf2pdf.exe"
 }

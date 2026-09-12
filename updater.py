@@ -446,9 +446,28 @@ class Update:
     def check_tools(self) -> bool:
         """统一检查并下载所有必需 / 可选工具。
 
-        必需：Java 环境 + ffdec、presse
+        必需：Java 环境 + ffdec、presse（Rust 模式下仅需 swf2pdf 二进制）
         可选：svg2pdf（仅在 swf2svg 模式下检查）
         """
+        # ---- Rust 模式：跳过 Java/ffdec/presse，仅检查 swf2pdf 二进制 ----
+        if self.cfg2.use_rust:
+            print("Rust 模式已启用，跳过 Java/ffdec/presse 检查。")
+            bin_path = self.cfg2.swf2pdf_bin
+            if not os.path.isfile(bin_path):
+                import shutil as _shutil
+                found = _shutil.which(bin_path)
+                if found:
+                    bin_path = found
+                else:
+                    print(f"错误: 未找到 swf2pdf 二进制: {bin_path}")
+                    print("请在 config.json 中设置 swf2pdf_bin 为正确路径，")
+                    print("或将 swf2pdf.exe 放到程序目录下。")
+                    print("下载地址: https://github.com/yanlearn2/swf2pdf-rs/releases")
+                    input_break()
+                    return False
+            print(f"swf2pdf 二进制就绪: {bin_path}")
+            return True
+
         # ---- 必需：Java + ffdec ----
         if not self.check_java():
             input_break()

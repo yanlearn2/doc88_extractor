@@ -477,6 +477,57 @@ class Converter:
             print("Can't convert this page! Skipping...")
             logw("PDF converting error: " + log)
 
+
+    # -- SWF -> PDF (Rust engine) --
+
+    def swf2pdf_rust(self, output_pdf: str) -> bool:
+        """Use swf2pdf-rs (pure Rust) to convert SWF dir to merged PDF.
+
+        No ffdec/Java needed, no presse merge needed, single call outputs final PDF.
+        """
+        swf_dir = ospath(self.cfg2.swf_path)
+        if not os.path.isdir(swf_dir) or not os.listdir(swf_dir):
+            print('SWF directory is empty, cannot convert!')
+            return False
+
+        bin_path = self.cfg2.swf2pdf_bin
+        if not os.path.isfile(bin_path):
+            import shutil as _shutil
+            found = _shutil.which(bin_path)
+            if found:
+                bin_path = found
+            else:
+                print(f'swf2pdf binary not found: {bin_path}')
+                print('Please set swf2pdf_bin in config.json to the correct path,')
+                print('or place swf2pdf.exe in the program directory.')
+                return False
+
+        print(f'Using Rust engine: {bin_path}')
+        print(f'SWF dir: {swf_dir}')
+        print(f'Output PDF: {output_pdf}')
+
+        try:
+            run = subprocess.run(
+                [bin_path, '--v3', '--verbose', swf_dir, output_pdf],
+                capture_output=True,
+                text=True,
+                errors='replace',
+            )
+            if run.stdout:
+                print(run.stdout)
+            if run.returncode != 0:
+                print(f'swf2pdf-rs failed (exit {run.returncode}): {run.stderr}')
+                logw('Rust PDF converting error: ' + (run.stderr or run.stdout))
+                return False
+            if os.path.isfile(output_pdf):
+                print(f'Rust conversion success: {output_pdf}')
+                return True
+            print('swf2pdf-rs did not generate output file')
+            return False
+        except FileNotFoundError:
+            print(f'Cannot execute swf2pdf binary: {bin_path}')
+            return False
+
     # -- SVG → PDF --
 
     def svg2pdf(self, i: int) -> None:
@@ -561,33 +612,46 @@ def convert(cfg: GenConfig) -> None:
             executor.submit(doc.fix_swf, i, parts[1], parts[2])
     gc.collect()
 
-    doc.divide_swfs(cfg2.convert_workers)
-    gc.collect()
-
-    if not cfg2.swf2svg:
-        print("Now start SWF -> PDF converting, please wait...")
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for i in range(max_workers):
-                executor.submit(doc.swf2pdf, i)
-        gc.collect()
-    else:
-        print("Now start SWF -> SVG converting, please wait...")
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for i in range(max_workers):
-                executor.submit(doc.swf2svg, i)
-        gc.collect()
-        print("Now start SVG -> PDF converting, please wait...")
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for i in range(1, cfg.p_count + 1):
-                executor.submit(doc.svg2pdf, i)
-        gc.collect()
-
-    print("Now start making pdf, please wait...")
     pdf_name = cfg2.o_dir_path + special_path(cfg.p_name) + ".pdf"
-    doc.makepdf(str(ospath(pdf_name)))
-    gc.collect()
-    print("转换完成！")
-    print("已将文件保存至 " + pdf_name)
+    pdf_path = str(ospath(pdf_name))
+
+    if cfg2.use_rust:
+        # Rust mode: swf2pdf-rs outputs merged PDF directly, no grouping/per-page/presse needed
+        print("Now start SWF -> PDF converting (Rust engine), please wait...")
+        success = doc.swf2pdf_rust(pdf_path)
+        gc.collect()
+        if not success:
+            raise Exception("Rust engine conversion failed! Check swf2pdf_bin config and logs.")
+        print("转换完成！")
+        print("已将文件保存至 " + pdf_name)
+    else:
+        # Legacy mode: ffdec per-page conversion + presse merge
+        doc.divide_swfs(cfg2.convert_workers)
+        gc.collect()
+
+        if not cfg2.swf2svg:
+            print("Now start SWF -> PDF converting, please wait...")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                for i in range(max_workers):
+                    executor.submit(doc.swf2pdf, i)
+            gc.collect()
+        else:
+            print("Now start SWF -> SVG converting, please wait...")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                for i in range(max_workers):
+                    executor.submit(doc.swf2svg, i)
+            gc.collect()
+            print("Now start SVG -> PDF converting, please wait...")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                for i in range(1, cfg.p_count + 1):
+                    executor.submit(doc.svg2pdf, i)
+            gc.collect()
+
+        print("Now start making pdf, please wait...")
+        doc.makepdf(pdf_path)
+        gc.collect()
+        print("转换完成！")
+        print("已将文件保存至 " + pdf_name)
     print(
         "Tip: 在 Edge 中查看文档可能会无法正常显示文本，"
         "但您也可以使用其他阅读器，例如 Chrome。"

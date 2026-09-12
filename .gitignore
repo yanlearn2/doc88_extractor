@@ -10,6 +10,7 @@ config.bin
 
 # Downloaded binary tools
 presse.exe
+swf2pdf.exe
 
 # Logs
 /logs/

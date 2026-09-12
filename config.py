@@ -36,6 +36,8 @@ class Config:
             "download_workers": 10,
             "convert_workers": 5,
             "pdf_scale": 1.0,
+            "use_rust": False,
+            "swf2pdf_bin": "swf2pdf.exe",
         }
         self.config_path = config_path
         # 运行时路径（非持久化）
